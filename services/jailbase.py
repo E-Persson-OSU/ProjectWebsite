@@ -4,7 +4,6 @@ from http.client import RemoteDisconnected
 import json
 import csv
 import time
-import config
 import random
 import services.db as db
 import os
