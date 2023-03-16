@@ -11,7 +11,6 @@ import os
 """global variables"""
 conn = http.client.HTTPSConnection("jailbase-jailbase.p.rapidapi.com")
 
-print(os.environ['X-RapidAPI-Key'])
 headers = {
     'X-RapidAPI-Key': '{}'.format(os.environ['X-RapidAPI-Key']),
     'X-RapidAPI-Host': "jailbase-jailbase.p.rapidapi.com"

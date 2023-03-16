@@ -1,5 +1,4 @@
 from flask import Flask, render_template
-
 import services.jailbase as jb
 import services.db as db
 import os
