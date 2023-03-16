@@ -7,11 +7,13 @@ import time
 import config
 import random
 import services.db as db
+import os
+from boto.s3.connection import S3Connection
 
 """global variables"""
 conn = http.client.HTTPSConnection("jailbase-jailbase.p.rapidapi.com")
 
-headers = config.headers
+headers = S3Connection(os.environ['headers'])
 
 """run this to search chosen jail for records containing first and last name"""
 def searchjailbase(source_id, last_name, first_name=""):
