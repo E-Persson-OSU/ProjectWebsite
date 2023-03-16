@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/stylesheet.css') }}">
+    <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='styles/stylesheet.css') }}">
     <title>{% block title %} {% endblock %}</title>
 
 </head>
@@ -25,44 +25,12 @@
 
         {% block content %}
         {% endblock %}
-        {% block recent %}
-        {% endblock %}
         
     </main>
 
     <footer>
         <div class="container">
             <div class="footer-links">
-                <section class="hero">
-                    <div class="container">
-                        <h1>Welcome to My Project Website</h1>
-                        <button class="btn">Get Started</button>
-                    </div>
-                </section>
-
-                <section class="features">
-                    <div class="container">
-                        <div class="feature">
-                            <h2>Feature 1</h2>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse
-                                lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
-                        </div>
-
-                        <div class="feature">
-                            <h2>Feature 2</h2>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse
-                                lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
-                        </div>
-
-                        <div class="feature">
-                            <h2>Feature 3</h2>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse
-                                lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
-                        </div>
-                    </div>
-                </section>
-                </main>
-
                 <footer>
                     <div class="container">
                         <div class="footer-links">
