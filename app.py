@@ -32,5 +32,9 @@ def about():
 def contact():
     return render_template('contact.html')
 
+@app.errorhandler(500)
+def internalservererror():
+    return "page not found"
+
 if __name__ == "__main__":
     app.run()
