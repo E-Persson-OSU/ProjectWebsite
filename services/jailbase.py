@@ -12,7 +12,10 @@ from boto.s3.connection import S3Connection
 """global variables"""
 conn = http.client.HTTPSConnection("jailbase-jailbase.p.rapidapi.com")
 
-headers = S3Connection(os.environ['headers'])
+headers = {
+    'X-RapidAPI-Key': '{}'.format(S3Connection(os.environ['X-RapidAPI-Key'])),
+    'X-RapidAPI-Host': "jailbase-jailbase.p.rapidapi.com"
+}
 
 """run this to search chosen jail for records containing first and last name"""
 def searchjailbase(source_id, last_name, first_name=""):
