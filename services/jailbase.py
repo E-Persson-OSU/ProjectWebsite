@@ -7,13 +7,12 @@ import time
 import random
 import services.db as db
 import os
-from boto.s3.connection import S3Connection
 
 """global variables"""
 conn = http.client.HTTPSConnection("jailbase-jailbase.p.rapidapi.com")
 
 headers = {
-    'X-RapidAPI-Key': '{}'.format(S3Connection(os.environ['X-RapidAPI-Key'])),
+    'X-RapidAPI-Key': '{}'.format(os.environ['X-RapidAPI-Key']),
     'X-RapidAPI-Host': "jailbase-jailbase.p.rapidapi.com"
 }
 
