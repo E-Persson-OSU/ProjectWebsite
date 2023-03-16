@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/stylesheet.css') }}">
+    <title>{% block title %} {% endblock %}</title>
+
+</head>
+
+<body>
+    <main>
+        <header>
+            <div class="logo">{% block logo %}{% endblock %}</div>
+            <nav>
+                <a href="{{ url_for('index')}}">Home</a>
+                <a href="{{ url_for('about')}}">About</a>
+                <a href="{{ url_for('contact')}}">Contact</a>
+            </nav>
+        </header>
+
+        {% block content %}
+        {% endblock %}
+        {% block recent %}
+        {% endblock %}
+        
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <section class="hero">
+                    <div class="container">
+                        <h1>Welcome to My Project Website</h1>
+                        <button class="btn">Get Started</button>
+                    </div>
+                </section>
+
+                <section class="features">
+                    <div class="container">
+                        <div class="feature">
+                            <h2>Feature 1</h2>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse
+                                lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
+                        </div>
+
+                        <div class="feature">
+                            <h2>Feature 2</h2>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse
+                                lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
+                        </div>
+
+                        <div class="feature">
+                            <h2>Feature 3</h2>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse
+                                lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
+                        </div>
+                    </div>
+                </section>
+                </main>
+
+                <footer>
+                    <div class="container">
+                        <div class="footer-links">
+                            <a href="#" class="footer-link">Privacy Policy</a>
+                            <a href="#" class="footer-link">Terms of Service</a>
+                            <a href="#" class="footer-link">FAQ</a>
+                        </div>
+                        <p>&copy; 2023 My Project. All rights reserved.</p>
+                    </div>
+                </footer>
+</body>
+
+</html>

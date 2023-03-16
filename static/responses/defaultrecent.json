@@ -1,0 +1,58 @@
+{
+  "status": 1,
+  "next_page": 2,
+  "records": [
+    {
+      "name": "XXXXX",
+      "charges": [
+        "Charge Level: Felony"
+      ],
+      "id": "/ca-lcso/2013-01-07/XXXXX",
+      "book_date_formatted": "Jan 07, 2013",
+      "details": [
+        [
+          "Gender",
+          "F"
+        ],
+        [
+          "Race",
+          "W"
+        ],
+        [
+          "Age (at arrest)",
+          51
+        ],
+        [
+          "Height",
+          "5 05"
+        ],
+        [
+          "Weight",
+          "170"
+        ],
+        [
+          "Eyes",
+          "BLU"
+        ],
+        [
+          "Hair",
+          "BLN"
+        ],
+        [
+          "Notes",
+          "Arrest Agency: LAPD-CEN TRAF DIVISION"
+        ],
+        [
+          "Ref #",
+          "3422265"
+        ]
+      ],
+      "mugshot": "http://images.jailbase.com/widgets/NoMug.gif",
+      "book_date": "2013-01-07",
+      "more_info_url": "http://www.jailbase.com/en/arrested/ca-lcso/2013-01-07/XXXXX"
+    }
+  ],
+  "current_page": 1,
+  "total_records": 100,
+  "msg": ""
+}

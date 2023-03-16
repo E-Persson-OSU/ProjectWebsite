@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+    <h1>{% block title %} Erik's Project Site {% endblock %}</h1>
+    <h1>{% block logo %}Erik's Project Site{% endblock %}</h1>
+
+{% block content %}
+    <section class="hero">
+            <div class="container">
+                <h1>Welcome to My Project Website</h1>
+                <button class="btn">Get Started</button>
+            </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <div class="feature">
+                <h2><a class="projecta" href="{{ url_for('jailbase')}}">Jailbase Project</a></h2>
+                <p>
+                    A project where I made use of a free API to build a website that allows you to search for the name and age of a 
+                    person in a given state and find if they have a jail record.
+                </p>
+            </div>
+            <div class="feature">
+                <h2>Feature 2</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus
+                    tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
+            </div>
+            <div class="feature">
+                <h2>Feature 3</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus
+                    tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
+            </div>
+        </div>
+    </section>
+{% endblock %}
