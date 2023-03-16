@@ -1,17 +1,16 @@
 from flask import Flask, render_template
 import services.jailbase as jb
 import services.db as db
-import os
-import threading
 import http.client as client
-import time
+
 
 
 """global variables"""
 app = Flask(__name__)
 
 def create_app():
-    """for waitress"""
+    db.init_db()
+    jb.getrecent()
     app.run()
 
 @app.route('/')
@@ -20,7 +19,7 @@ def index():
 
 @app.route('/jailbase')
 def jailbase():
-    records = jb.getrecent()
+    records = db.getrecentdb()
     return render_template('jailbase.html', records=records)
 
 @app.route('/about')
@@ -36,4 +35,4 @@ def internalservererror():
     return "page not found"
 
 if __name__ == "__main__":
-    app.run()
+    create_app()

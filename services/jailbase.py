@@ -89,6 +89,8 @@ def getrecent():
                 break
     
     records = data["records"]
+    print(records)
+    db.addrecentdb(records)
     return records
 
 

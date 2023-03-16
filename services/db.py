@@ -14,18 +14,30 @@ def get_db():
 
     return db
 
-"""def init_db(absolute_dir):
+def init_db():
     db = get_db()
-    abs_file_path = os.path.join(absolute_dir,rel_dir)
-    print(abs_file_path)
-    with current_app.open_resource(rel_dir) as f:
-        db.executescript(f.read().decode('utf8'))
+    create_table()
     db.commit()
-    db.close()"""
+    db.close()
 
+def create_table():
+    conn = sqlite3.connect('database.db')  # Replace "your_database.db" with your actual database name
+    c = conn.cursor()
 
+    # Execute the SQLite3 command to create the table
+    c.execute('DROP TABLE IF EXISTS recents;')
 
+    c.execute('''
+        CREATE TABLE recents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            bookdate TEXT,
+            imglink TEXT
+        );
+    ''')
 
+    conn.commit()
+    conn.close()
 
 def addrecentdb(recents):
     db = get_db()
@@ -33,30 +45,27 @@ def addrecentdb(recents):
     for recent in recents:
         cursor.execute("INSERT INTO recents VALUES (?,?,?,?)", (None, recent['name'], recent['book_date'], recent['mugshot']))
     db.commit()
+    db.close()
 
 def getrecentdb():
-    records = {
-        "name":"",
-        "book_date": "",
-        "mugshot": ""
-    }
+    records = []
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM recents")
     rows = cursor.fetchall()
-    for row in rows():
-        records["name"] = row[1]
-        records["book_date"] = row[2]
-        records["mugshot"] = row[3]
-    data = {"records": records}
-    return data
-    
-
-
-    
-
-@click.command('init-db')
-def init_db_command():
-    """Clear the existing data and create new tables."""
-    init_db()
-    click.echo('Initialized the database.')
+    for row in rows:
+        record = {
+            "name":"",
+            "book_date": "",
+            "mugshot": ""
+        }
+        print(row[1])
+        record["name"] = row[1]
+        print(row[2])
+        record["book_date"] = row[2]
+        print(row[3])
+        record["mugshot"] = row[3]
+        records.append(record)
+    print(len(records))
+    # data = {"records": records}
+    return records
