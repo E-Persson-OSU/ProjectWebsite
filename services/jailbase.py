@@ -40,7 +40,8 @@ def searchjailbase(source_id, last_name, first_name=''):
         elif page == 1:
             search_results = copy.deepcopy(data)
         else:
-            search_results['records'].append(copy.deepcopy(data['records']))
+            for record in data['records']:
+                search_results['records'].append(copy.deepcopy(record))
         if data['next_page'] == '0':
             return search_results
         page = page + 1
