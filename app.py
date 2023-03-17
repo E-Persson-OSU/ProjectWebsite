@@ -1,7 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import services.jailbase as jb
 import services.db as db
-import http.client as client
+import random
 
 
 
@@ -9,8 +9,8 @@ import http.client as client
 app = Flask(__name__)
 
 def create_app():
-    db.init_db()
-    jb.getrecent()
+    source_ids = jb.getsourceids()
+    db.init_db(source_ids)
     app.run()
 
 @app.route('/')
@@ -19,7 +19,20 @@ def index():
 
 @app.route('/jailbase')
 def jailbase():
-    records = db.getrecentdb()
+    #records = jb.getrecent(db.getrandomsourceid()) Get this working eventually
+    randomsource = random.choice(jb.getsourceids)
+    records = jb.getrecent(randomsource['source_id'])
+    return render_template('jailbase.html', records=records['records'])
+
+"""open page only after clicking search button, otherwise default values will be used"""
+@app.route('/jailbase/search')
+def jailbasesearch():
+    form_data = request.form
+    print(form_data)
+    state = 'OH'
+    l_name = 'persson'
+    f_name = 'erik'
+    records = jb.searchjailbase(state, l_name, f_name)
     return render_template('jailbase.html', records=records)
 
 @app.route('/about')

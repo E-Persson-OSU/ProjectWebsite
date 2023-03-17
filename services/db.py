@@ -1,11 +1,8 @@
 import sqlite3
-
-import click
-from flask import current_app
 import os
 
 """global variables"""
-rel_dir = "/static/db/schema.sql"
+SCHEMA_DIR = "/static/db/schema.sql"
 
 
 def get_db():
@@ -13,31 +10,6 @@ def get_db():
     db.row_factory = sqlite3.Row
 
     return db
-
-def init_db():
-    db = get_db()
-    create_table()
-    db.commit()
-    db.close()
-
-def create_table():
-    conn = sqlite3.connect('database.db')  # Replace "your_database.db" with your actual database name
-    c = conn.cursor()
-
-    # Execute the SQLite3 command to create the table
-    c.execute('DROP TABLE IF EXISTS recents;')
-
-    c.execute('''
-        CREATE TABLE recents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            bookdate TEXT,
-            imglink TEXT
-        );
-    ''')
-
-    conn.commit()
-    conn.close()
 
 def addrecentdb(recents):
     db = get_db()
@@ -69,3 +41,41 @@ def getrecentdb():
     print(len(records))
     # data = {"records": records}
     return records
+
+
+"""
+------------------------------------------
+
+            Init Methods
+
+------------------------------------------
+"""
+def init_db(source_ids):
+    create_table()
+
+def create_table():
+    conn = sqlite3.connect('database.db')  # Replace "your_database.db" with your actual database name
+    c = conn.cursor()
+
+    # Execute the SQLite3 command to create the table
+    c.execute('DROP TABLE IF EXISTS recents;')
+
+    c.execute('''
+        CREATE TABLE recents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            bookdate TEXT,
+            imglink TEXT
+        );
+    ''')
+
+    conn.commit()
+    conn.close()
+
+"""
+------------------------------------------
+
+            Internal Methods
+
+------------------------------------------
+"""
