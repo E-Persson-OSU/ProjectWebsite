@@ -168,7 +168,7 @@
 			height: auto;
 			overflow: hidden;
 		}
-		.jbcards {
+		.jbcard {
 			border-color: #555;
 			border-width: 2px;
 			border-style: solid;
@@ -180,6 +180,35 @@
 			width: 20%;
 		}
 
+		.card {
+		  	width: 300px;
+		  	background-color: #fff;
+		  	border: 1px solid #ccc;
+		  	border-radius: 5px;
+		  	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		  	overflow: hidden;
+		}
+
+		.card img {
+		  	width: 100%;
+		  	height: auto;
+		}
+
+		.card .info {
+		  	padding: 20px;
+		}
+
+		.card .date {
+		  	font-size: 14px;
+		  	color: #999;
+		  	margin-bottom: 10px;
+		}
+
+		.card .name {
+		  	font-size: 24px;
+		  	color: #333;
+		  	margin: 0;
+		}
 		/* On mouse-over, add a deeper shadow */
 		.jbcards:hover {
   			box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);

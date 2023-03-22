@@ -71,11 +71,11 @@
 
 <div class="jbrecords">
     {% for record in records %}
-    <div id="record" class="jbcards">
-        <img alt="No Mugshot Available" src="{{ record['mugshot'] }}" class="jbcardimage">
-        <div class="jbcardcontainer">
-            <h4><b>{{ record['name'] }}</b></h4>
-            <p>{{ record['book_date'] }}</p>
+    <div id="record" class="card">
+        <img alt="No Mugshot Available" src="{{ record['mugshot'] }}" class="img">
+        <div class="info">
+            <h4 class="name"><b>{{ record['name'] }}</b></h4>
+            <span class="date">{{ record['book_date'] }}</span>
         </div> 
     </div>
     {% endfor %}

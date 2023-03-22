@@ -20,7 +20,7 @@ def index():
 @app.route('/jailbase')
 def jailbase():
     #records = jb.getrecent(db.getrandomsourceid()) Get this working eventually
-    randomsource = random.choice(jb.getsourceids)
+    randomsource = random.choice(db.getsourceids())
     records = jb.getrecent(randomsource['source_id'])
     return render_template('jailbase.html', records=records['records'])
 
