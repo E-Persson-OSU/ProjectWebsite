@@ -167,6 +167,9 @@
 			width: 100%;
 			height: auto;
 			overflow: hidden;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-evenly;
 		}
 		.jbcard {
 			border-color: #555;
@@ -187,6 +190,7 @@
 		  	border-radius: 5px;
 		  	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		  	overflow: hidden;
+			margin-right: 0;
 		}
 
 		.card img {

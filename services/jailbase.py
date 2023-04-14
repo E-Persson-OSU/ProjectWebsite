@@ -8,7 +8,7 @@ import threading
 
 GLOBAL_PARAMS = {
     'source_id': '',
-    'page': '',
+    'page': 1,
     'last_name': '',
     'first_name': ''
 }
@@ -26,33 +26,34 @@ __sources__ = '/sources/'
 """
 
 """
-    searches jailbase API for given first name and last name in page at source ID
+    searches jailbase API for given first name and last name for each source_id provided
     might return data object as dictionary containing 'exception' key
 """
-def searchjailbase(source_id, last_name, first_name=''):
-    search_results = {}
+def searchjailbase(source_ids, last_name, first_name=''):
+    search_results = []
     params = copy.deepcopy(GLOBAL_PARAMS)
-    page = 1
-    while True:
-        params.update({'source_id': source_id, 'last_name': last_name, 'first_name': first_name, 'page': page})
-        data = _requestbuilder(__search__, params)
-        if 'exception' in data:
-            return data
-        elif page == 1:
-            search_results = copy.deepcopy(data)
-        else:
-            for record in data['records']:
-                search_results['records'].append(copy.deepcopy(record))
-        if data['next_page'] == '0':
-            return search_results
-        page = page + 1
+    for source_id in source_ids:
+        another_page = True
+        page = 1
+        while another_page:
+            params.update({'source_id': source_id['source_id'], 'last_name': last_name, 'first_name': first_name, 'page': page})
+            data = _requestbuilder(__search__, params)
+            if 'exception' not in data:
+                records = data['records']
+                for record in records:
+                    search_results.append(record)
+                if data['next_page'] > 0:
+                    page = data['next_page']
+                else:
+                    another_page = False
+    return search_results
         
 
 """
     Gets recents from required source_id
     might return data object as dictionary containing 'exception' key
 """
-def getrecent(source_id, page='1'):
+def getrecent(source_id, page=1):
     params = copy.deepcopy(GLOBAL_PARAMS)
     params['source_id'] = source_id
     params['page'] = page
@@ -80,9 +81,10 @@ def getsourceids():
         data = _requestbuilder(__recent__, params)
         if 'exception' not in data:
             working_source_ids.append(record)
-            print('{} is broken\n'.format(params['source_id']))
-        else:
             print('{} is a working souce_id\n'.format(params['source_id']))
+        else:
+            print('{} is broken\n'.format(params['source_id']))
+
 
     return working_source_ids
 
@@ -121,7 +123,7 @@ def _requestbuilder(type, params):
         if len(params['first_name']) > 0:
             query = query + '&first_name={}'.format(params['first_name'])
 
-        if len(params['page']) > 0:
+        if params['page'] > 0:
             query = query + '&page={}'.format(params['page'])
     
     while True:

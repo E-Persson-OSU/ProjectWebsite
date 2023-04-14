@@ -9,8 +9,10 @@ import random
 app = Flask(__name__)
 
 def create_app():
+    """
     source_ids = jb.getsourceids()
     db.init_db(source_ids)
+    """
     app.run()
 
 @app.route('/')
@@ -25,15 +27,27 @@ def jailbase():
     return render_template('jailbase.html', records=records['records'])
 
 """open page only after clicking search button, otherwise default values will be used"""
-@app.route('/jailbase/search')
+@app.route('/jailbase/search/', methods = ['POST', 'GET'])
 def jailbasesearch():
-    form_data = request.form
-    print(form_data)
-    state = 'OH'
-    l_name = 'persson'
-    f_name = 'erik'
-    records = jb.searchjailbase(state, l_name, f_name)
-    return render_template('jailbase.html', records=records)
+    if request.method == 'GET':
+        print('JBSEARCH GET')
+        form_data = request.args.get('state')
+        print(form_data)
+        state = request.args.get('state')
+        l_name = request.args.get('lname')
+        f_name = request.args.get('fname')
+        source_ids = db.get_idsforstate(state)
+        records = jb.searchjailbase(source_ids, l_name, f_name)
+        return render_template('jailbase.html', records=records)
+    if request.method == 'POST':
+        print('JBSEARCH POST')
+
+
+
+
+
+
+
 
 @app.route('/about')
 def about():
