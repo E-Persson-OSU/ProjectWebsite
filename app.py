@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 def create_app():
     """
+    add these back when I figure out a way to make it faster. Threading?
     source_ids = jb.getsourceids()
     db.init_db(source_ids)
     """
