@@ -44,12 +44,6 @@ def jailbasesearch():
         print('JBSEARCH POST')
 
 
-
-
-
-
-
-
 @app.route('/about')
 def about():
     return render_template('about.html')
