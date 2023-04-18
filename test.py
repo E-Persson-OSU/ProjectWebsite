@@ -10,15 +10,13 @@ def test_max_rows():
 def test_get_rows(mr):
     rows = gd.get_rows(22, mr)
     print(len(rows))
-    print(rows[0])
     return rows
 
 
 def test_trgc(rows):
     contents = gd.take_rows_give_contents(rows)
     print(len(contents))
-    for key in contents[0].keys:
-        print("{}: {}".format(key, contents[0][key]))
+    print(contents[0])
 
 
 if __name__ == "__main__":

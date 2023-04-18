@@ -8,6 +8,20 @@ from static.govdeals_cats import (
     GOVDEALS_LINK_CAT_MAX_ROWS,
 )
 
+
+def remove_escape_characters(text):
+    # Define regex pattern to match escape characters
+    escape_pattern = r'\\[nrt\xa0]'
+
+    # Replace escape characters with their corresponding characters
+    return re.sub(escape_pattern, lambda match: {
+        '\\n': '\n',
+        '\\r': '\r',
+        '\\t': '\t',
+        '\\xa0': ' ',
+    }[match.group()], text)
+
+
 """
 Worker methods for updating database
 
@@ -78,19 +92,29 @@ def take_rows_give_contents(rows):
             "more_info_link": None,
             "photo_link": None,
         }
+        row = str(row)
         soup = BeautifulSoup(row, "html.parser")
-        content_dict["description"] = soup.find(id="result_col_2").find("a").text
-        content_dict["location"] = soup.find(id="result_col_3").text
-        content_dict["auction_close"] = (
-            soup.find(id="result_col_4").find("label").text
-            + soup.find(id="result_col_4").find("label").find("span").text
-        )
-        content_dict["current_bid"] = soup.find(id="bid_price").text
-        content_dict["more_info_link"] = (
-            soup.find(id="result_col_1").find("div").find("a")["href"]
-        )
-        content_dict["photo_link"] = soup.find(id="result_col_1").find("a")["href"]
+        # Find the relevant elements in the HTML
+        result_col_2 = soup.find(id="result_col_2")
+        result_col_3 = soup.find(id="result_col_3")
+        result_col_4 = soup.find(id="result_col_4")
+        bid_price = soup.find(id="bid_price")
+        result_col_1_div_a = soup.find(id="result_col_1").find("div").find("a")
+        result_col_1_a = soup.find(id="result_col_1").find("a")
+
+        # Extract the desired information from the elements
+        content_dict["description"] = result_col_2.find("a").text.strip() if result_col_2 else ""
+        content_dict["location"] = result_col_3.text.strip() if result_col_3 else ""
+        auction_close_label = result_col_4.find("label").text.strip() if result_col_4 else ""
+        auction_close_span = result_col_4.find("label").find("span").text.strip() if result_col_4 else ""
+        content_dict["auction_close"] = auction_close_label.strip() + auction_close_span.strip()
+        content_dict["current_bid"] = bid_price.text.strip() if bid_price else ""
+        content_dict["more_info_link"] = result_col_1_div_a["href"].strip() if result_col_1_div_a else ""
+        content_dict["photo_link"] = result_col_1_a["href"].strip() if result_col_1_a else ""
+
+        # Add the information to the list of results
         contents.append(copy.deepcopy(content_dict))
+
     return contents
 
 
