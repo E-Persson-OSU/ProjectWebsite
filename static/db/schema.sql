@@ -1,4 +1,15 @@
-DROP TABLE IF EXISTS source_ids;
+DROP TABLE IF EXISTS GovDeals;
+
+CREATE TABLE IF NOT EXISTS GovDeals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category INTEGER,
+                description TEXT,
+                location TEXT,
+                auction_close INTEGER,
+                current_bid TEXT
+                more_info_link TEXT,
+                photo_link TEXT
+)
 
 CREATE TABLE IF NOT EXISTS source_ids  (
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
