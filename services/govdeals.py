@@ -8,6 +8,14 @@ from static.govdeals_cats import (
     GOVDEALS_LINK_CAT_MAX_ROWS,
 )
 
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Cache-Control": "max-age=0",
+}
+
 
 def remove_escape_characters(text):
     # Define regex pattern to match escape characters
@@ -39,7 +47,7 @@ Worker methods for updating database
 def get_max_rows(cat_code):
     url = get_link(cat_code)
     try:
-        response = requests.get(url)
+        response = requests.get(url=url, headers=headers)
         response.raise_for_status()  # raise an error if the response status code is not 200
         soup = BeautifulSoup(response.content, "html.parser")
         allstrong = soup.find_all("strong")
