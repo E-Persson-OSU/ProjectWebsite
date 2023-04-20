@@ -1,6 +1,7 @@
 from services import govdeals as gd
 import json
 
+
 def test_max_rows():
     max_rows = gd.get_max_rows(28)
     print(max_rows)
@@ -18,11 +19,13 @@ def test_trgc(rows):
     print(len(contents))
     print(contents[0])
 
+
 def create_json_dump(dump):
-    with open('static\\bin\\test_rows.json', 'w') as f:
-        json.dump(dump,fp=f)
-    print('Flush!')
+    with open("static\\bin\\test_rows.json", "w") as f:
+        json.dump(dump, fp=f)
+    print("Flush!")
+
 
 if __name__ == "__main__":
-    for_db = gd.gather_listings()
-    create_json_dump(for_db)
+    data = gd.load_json_dump()
+    print(data[0][0])

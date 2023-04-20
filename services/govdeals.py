@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import copy
+import json
 from static.bin.proxies import random_proxy
 from static.govdeals_cats import (
     GOVDEALS_LINK_CAT,
@@ -176,7 +177,10 @@ def gather_listings() -> list:
             all_rows.append(contents)
     return all_rows
 
-
+def load_json_dump():
+    with open("static\\bin\\test_rows.json", "r") as f:
+        data = json.load(fp=f)
+    return data
 """
 Web methods for querying database and populating webpage
 

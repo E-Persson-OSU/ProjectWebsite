@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import services.jailbase as jb
 import services.db as db
+import services.govdeals as gd
 import random
 
 
@@ -54,7 +55,17 @@ def jailbasesearch():
 
 @app.route("/govdeals/")
 def govdeals():
-    return render_template("govdeals.html")
+    return app.redirect("/govdeals/1")
+
+
+@app.route("/govdeals/<pagenum>", methods=["POST", "GET"])
+def govdealspage(pagenum=1):
+    data = gd.load_json_dump()
+    items = []
+    for l in data:
+        for row in l:
+            items.append(row)
+    return render_template("govdeals.html", items=PageResult(items, page=int(pagenum)))
 
 
 @app.route("/about")
@@ -70,6 +81,21 @@ def contact():
 @app.errorhandler(500)
 def internalservererror():
     return "page not found"
+
+
+class PageResult:
+    def __init__(self, data, page=1, number=10):
+        self.__dict__ = dict(zip(["data", "page", "number"], [data, page, number]))
+        self.full_listing = [
+            self.data[i : i + number] for i in range(0, len(self.data), number)
+        ]
+
+    def __iter__(self):
+        for i in self.full_listing[self.page - 1]:
+            yield i
+
+    def __repr__(self):  # used for page linking
+        return "/govdeals/{}".format(self.page + 1)  # view the next page
 
 
 if __name__ == "__main__":

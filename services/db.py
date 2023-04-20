@@ -86,30 +86,10 @@ def init_db(source_ids=[]):
 
 
 def create_table():
-    db = sqlite3.connect(
-        "database.db"
-    )  # Replace "your_database.db" with your actual database name
+    db = get_db()
     c = db.cursor()
-
-    # Execute the SQLite3 command to create the table
-    """ c.execute('''DROP TABLE IF EXISTS source_id''')
-    c.execute('''CREATE TABLE IF NOT EXISTS source_id  (
-                 id INTEGER PRIMARY KEY,
-                 city TEXT,
-                 name TEXT,
-                 state_full TEXT,
-                 address1 TEXT,
-                 source_url TEXT,
-                 county TEXT,
-                 phone TEXT,
-                 state TEXT,
-                 source_id TEXT,
-                 zip_code TEXT,
-                 email TEXT,
-                 has_mugshots BOOLEAN)''') """
     with open("static\db\schema.sql") as f:
         c.executescript(f.read())
-
     db.commit()
     db.close()
 
