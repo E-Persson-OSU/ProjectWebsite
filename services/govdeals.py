@@ -180,7 +180,7 @@ def gather_listings() -> list:
 
 
 def load_json_dump():
-    data_folder = Path("static\\bin\\")
+    data_folder = Path("static/bin/")
     file_path = data_folder / "test_rows.json"
     with open(file_path, "r") as f:
         data = json.load(fp=f)
