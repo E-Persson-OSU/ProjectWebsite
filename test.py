@@ -8,7 +8,7 @@ def test_max_rows():
 
 
 def test_get_rows(mr):
-    rows = gd.get_rows(22, mr)
+    rows = gd.get_rows(28, mr)
     print(len(rows))
     return rows
 
@@ -20,6 +20,5 @@ def test_trgc(rows):
 
 
 if __name__ == "__main__":
-    max_rows = test_max_rows()
-    rows = test_get_rows(max_rows)
-    test_trgc(rows)
+    for_db = gd.gather_listings()
+    print(for_db[0][0])

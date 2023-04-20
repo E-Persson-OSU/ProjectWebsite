@@ -11,15 +11,19 @@ from static.govdeals_cats import (
 
 def remove_escape_characters(text):
     # Define regex pattern to match escape characters
-    escape_pattern = r'\\[nrt\xa0]'
+    escape_pattern = r"\\[nrt\xa0]"
 
     # Replace escape characters with their corresponding characters
-    return re.sub(escape_pattern, lambda match: {
-        '\\n': '\n',
-        '\\r': '\r',
-        '\\t': '\t',
-        '\\xa0': ' ',
-    }[match.group()], text)
+    return re.sub(
+        escape_pattern,
+        lambda match: {
+            "\\n": "\n",
+            "\\r": "\r",
+            "\\t": "\t",
+            "\\xa0": " ",
+        }[match.group()],
+        text,
+    )
 
 
 """
@@ -57,7 +61,7 @@ def get_max_rows(cat_code):
         return None
 
 
-def get_rows(cc, mr):
+def get_rows(cc, mr) -> list:
     url = get_link(cat_code=cc, max_rows=mr)
     try:
         response = requests.get(url)
@@ -73,7 +77,7 @@ def get_rows(cc, mr):
         return None
 
 
-def get_link(cat_code, max_rows=0):
+def get_link(cat_code, max_rows=0) -> str:
     if max_rows > 0:
         return GOVDEALS_LINK_CAT_MAX_ROWS.format(cat_code, max_rows)
     else:
@@ -81,7 +85,7 @@ def get_link(cat_code, max_rows=0):
 
 
 # takes a list of unparsed rows, returns the required contents as a list of dicts
-def take_rows_give_contents(rows):
+def take_rows_give_contents(rows) -> list:
     contents = []
     for row in rows:
         content_dict = {
@@ -103,19 +107,55 @@ def take_rows_give_contents(rows):
         result_col_1_a = soup.find(id="result_col_1").find("a")
 
         # Extract the desired information from the elements
-        content_dict["description"] = result_col_2.find("a").text.strip() if result_col_2 else ""
+        content_dict["description"] = (
+            result_col_2.find("a").text.strip() if result_col_2 else ""
+        )
         content_dict["location"] = result_col_3.text.strip() if result_col_3 else ""
-        auction_close_label = result_col_4.find("label").text.strip() if result_col_4 else ""
-        auction_close_span = result_col_4.find("label").find("span").text.strip() if result_col_4 else ""
-        content_dict["auction_close"] = auction_close_label.strip() + auction_close_span.strip()
+        auction_close_label = (
+            result_col_4.find("label").text.strip() if result_col_4 else ""
+        )
+        auction_close_span = (
+            result_col_4.find("label").find("span").text.strip() if result_col_4 else ""
+        )
+        content_dict["auction_close"] = (
+            auction_close_label.strip() + auction_close_span.strip()
+        )
         content_dict["current_bid"] = bid_price.text.strip() if bid_price else ""
-        content_dict["more_info_link"] = result_col_1_div_a["href"].strip() if result_col_1_div_a else ""
-        content_dict["photo_link"] = result_col_1_a["href"].strip() if result_col_1_a else ""
+        content_dict["more_info_link"] = (
+            result_col_1_div_a["href"].strip() if result_col_1_div_a else ""
+        )
+        content_dict["photo_link"] = (
+            result_col_1_a["href"].strip() if result_col_1_a else ""
+        )
 
         # Add the information to the list of results
+        for key, value in content_dict.items():
+            content_dict[key] = (
+                value.replace("\r", "")
+                .replace("\n", "")
+                .replace("\t", "")
+                .replace("\xa0", "")
+                .strip()
+            )
+
         contents.append(copy.deepcopy(content_dict))
 
     return contents
+
+
+# returns a list containing a list of dicts formatted for insertion into DB
+def gather_listings() -> list:
+    cat_code_dict = copy.deepcopy(GOVDEALS_CODES)
+    # Get max rows for all categories in a single HTTP request
+    cat_max_rows = {k: get_max_rows(v) for k, v in cat_code_dict.items()}
+
+    all_rows = []
+    for key, cat_code in cat_code_dict.items():
+        rows = get_rows(cat_code, cat_max_rows[key])
+        if rows is not None:
+            contents = take_rows_give_contents(rows)
+            all_rows.append(contents)
+    return all_rows
 
 
 """
