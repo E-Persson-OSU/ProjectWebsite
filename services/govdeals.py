@@ -153,6 +153,7 @@ def take_rows_give_contents(rows) -> list:
                 .replace("\n", "")
                 .replace("\t", "")
                 .replace("\xa0", "")
+                .replace('Location:', '')
                 .strip()
             )
 

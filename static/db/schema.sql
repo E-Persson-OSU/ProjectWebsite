@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS GovDeals (
                 current_bid TEXT
                 more_info_link TEXT,
                 photo_link TEXT
-)
+);
 
 CREATE TABLE IF NOT EXISTS source_ids  (
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,4 +24,4 @@ CREATE TABLE IF NOT EXISTS source_ids  (
                  source_id TEXT,
                  zip_code TEXT,
                  email TEXT,
-                 has_mugshots BOOLEAN)
+                 has_mugshots BOOLEAN);
