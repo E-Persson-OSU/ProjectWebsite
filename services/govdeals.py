@@ -2,11 +2,13 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import copy
+from static.bin.proxies import random_proxy
 from static.govdeals_cats import (
     GOVDEALS_LINK_CAT,
     GOVDEALS_CODES,
     GOVDEALS_LINK_CAT_MAX_ROWS,
 )
+
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
@@ -47,7 +49,7 @@ Worker methods for updating database
 def get_max_rows(cat_code):
     url = get_link(cat_code)
     try:
-        response = requests.get(url=url, headers=headers)
+        response = requests.get(url=url, headers=headers, proxies=random_proxy())
         response.raise_for_status()  # raise an error if the response status code is not 200
         soup = BeautifulSoup(response.content, "html.parser")
         allstrong = soup.find_all("strong")
@@ -64,7 +66,11 @@ def get_max_rows(cat_code):
         else:
             print("No match found")
         return max_rows
-    except (requests.exceptions.RequestException, ValueError) as e:
+    except (
+        requests.exceptions.RequestException,
+        ValueError,
+        requests.exceptions.ConnectionError,
+    ) as e:
         print(f"Error: {e}")
         return None
 
@@ -72,7 +78,7 @@ def get_max_rows(cat_code):
 def get_rows(cc, mr) -> list:
     url = get_link(cat_code=cc, max_rows=mr)
     try:
-        response = requests.get(url)
+        response = requests.get(url=url, headers=headers, proxies=random_proxy())
         response.raise_for_status()  # raise an error if the response status code is not 200
         soup = BeautifulSoup(response.content, "html.parser")
         allrow = soup.find_all("div", id="boxx_row")
@@ -80,7 +86,11 @@ def get_rows(cc, mr) -> list:
         for row in allrow:
             rows.append(row)
         return rows
-    except (requests.exceptions.RequestException, ValueError) as e:
+    except (
+        requests.exceptions.RequestException,
+        ValueError,
+        requests.exceptions.ConnectionError,
+    ) as e:
         print(f"Error: {e}")
         return None
 
