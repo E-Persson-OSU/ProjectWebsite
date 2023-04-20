@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import copy
+from pathlib import Path
 import json
 from static.bin.proxies import random_proxy
 from static.govdeals_cats import (
@@ -154,7 +155,7 @@ def take_rows_give_contents(rows) -> list:
                 .replace("\n", "")
                 .replace("\t", "")
                 .replace("\xa0", "")
-                .replace('Location:', '')
+                .replace("Location:", "")
                 .strip()
             )
 
@@ -177,10 +178,15 @@ def gather_listings() -> list:
             all_rows.append(contents)
     return all_rows
 
+
 def load_json_dump():
-    with open("static\\bin\\test_rows.json", "r") as f:
+    data_folder = Path("static\\bin\\")
+    file_path = data_folder / "test_rows.json"
+    with open(file_path, "r") as f:
         data = json.load(fp=f)
     return data
+
+
 """
 Web methods for querying database and populating webpage
 
