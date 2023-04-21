@@ -4,13 +4,22 @@ import re
 import copy
 from pathlib import Path
 import json
-from static.bin.proxies import random_proxy
+import logging
+from static.proxies import random_proxy
 from static.govdeals_cats import (
     GOVDEALS_LINK_CAT,
     GOVDEALS_CODES,
     GOVDEALS_LINK_CAT_MAX_ROWS,
 )
 
+LOGGING_PATH = Path("services/logs/") / "govdeals.log"
+
+logging.basicConfig(
+    filename=LOGGING_PATH,
+    filemode="w",
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
@@ -180,7 +189,7 @@ def gather_listings() -> list:
 
 
 def load_json_dump():
-    data_folder = Path("static/bin/")
+    data_folder = Path("services/json-cache/")
     file_path = data_folder / "test_rows.json"
     with open(file_path, "r") as f:
         data = json.load(fp=f)

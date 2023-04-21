@@ -1,11 +1,19 @@
 import os
 import redis
+from pathlib import Path
 from rq import Worker, Queue, Connection
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
 import sys
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+LOGGING_PATH = Path("services/logs/") / "worker.log"
+
+logging.basicConfig(
+    filename=LOGGING_PATH,
+    filemode="w",
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
 
 listen = ["high", "default", "low"]
 

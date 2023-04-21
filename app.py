@@ -43,19 +43,23 @@ def jailbase():
 
 @app.route("/jailbase/search/", methods=["POST", "GET"])
 def jailbasesearch():
-    if request.method == "GET":
-        print("JBSEARCH GET")
-        return app.redirect("/jailbase")
     if request.method == "POST":
         print("JBSEARCH POST")
         form_data = request.args.get("state")
         print(form_data)
-        state = request.args.get("state")
+        source_ids = []
         l_name = request.args.get("lname")
         f_name = request.args.get("fname")
-        source_ids = db.get_idsforstate(state)
-        records = jb.searchjailbase(source_ids, l_name, f_name)
+        try:
+            source_ids = db.get_idsforstate(form_data)
+            records = jb.searchjailbase(source_ids, l_name, f_name)
+        except Exception as e:
+            print(f"Error: {e}")
+            records = []
         return render_template("jailbase.html", records=records)
+    else:
+        print("JBSEARCH GET")
+        return app.redirect("/jailbase")
 
 
 @app.route("/govdeals/")
