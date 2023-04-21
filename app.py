@@ -3,7 +3,11 @@ import services.jailbase as jb
 import services.db as db
 import services.govdeals as gd
 import random
+from worker import conn
+from rq import Queue
+import services.utils as ut
 
+q = Queue(connection=conn)
 
 """global variables"""
 app = Flask(__name__)
@@ -22,6 +26,7 @@ def create_app():
 
 @app.route("/")
 def index():
+    results = q.enqueue(ut.background_updates())
     return render_template("index.html")
 
 

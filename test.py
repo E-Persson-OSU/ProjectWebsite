@@ -1,5 +1,6 @@
-from services import govdeals as gd
+import services.govdeals as gd
 import json
+import services.utils as ut
 
 
 def test_max_rows():
@@ -27,5 +28,4 @@ def create_json_dump(dump):
 
 
 if __name__ == "__main__":
-    data = gd.load_json_dump()
-    print(data[0][0])
+    ut.background_updates()
