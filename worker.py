@@ -2,7 +2,7 @@ import os
 import redis
 from pathlib import Path
 from rq import Worker, Queue, Connection
-from apscheduler.schedulers.blocking import BlockingScheduler
+
 import logging
 import sys
 
