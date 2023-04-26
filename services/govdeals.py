@@ -195,8 +195,17 @@ def load_json_dump():
 
 
 def convert_datetime(dt: str) -> int:
-    knowntime = parser.parse(dt)
+    knowntime = parser.parse(remove_duplicate_time(dt))
     return int(knowntime.timestamp())
+
+
+def remove_duplicate_time(s: str) -> str:
+    pattern = r"(\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2} [AP]M [A-Z]{2})(\d{1,2}:\d{2} [AP]M [A-Z]{2})$"
+    match = re.search(pattern, s)
+    if match:
+        return s[: match.start(2)].strip()
+    else:
+        return s
 
 
 class GovDealsListing:
@@ -227,7 +236,7 @@ class GovDealsListing:
     @property
     def auction_close(self) -> str:
         # stored as integer, converted back to string for use
-        dt = datetime.fromtimestamp(int(self._gddict.get("auction_close", "")))
+        dt = datetime.datetime.fromtimestamp(int(self._gddict.get("auction_close", "")))
         return dt.strftime("%Y-%m-%d %H:%M:%S")
 
     @property
