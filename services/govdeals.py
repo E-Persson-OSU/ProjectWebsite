@@ -4,6 +4,9 @@ import re
 import copy
 from pathlib import Path
 import json
+import datetime
+from dateutil import parser
+from typing import List
 from static.proxies import random_proxy
 from services.base_logger import logger
 from static.govdeals_cats import (
@@ -109,7 +112,7 @@ def get_link(cat_code, max_rows=0) -> str:
 
 
 # takes a list of unparsed rows, returns the required contents as a list of dicts
-def take_rows_give_contents(rows, gdcat):
+def take_rows_give_contents(rows, gdlistings, cc):
     for row in rows:
         content_dict = {
             "description": None,
@@ -161,26 +164,26 @@ def take_rows_give_contents(rows, gdcat):
                 .replace("Location:", "")
                 .strip()
             )
+        # change auction close time to integer for storage
+        content_dict["auction_close"] = convert_datetime(content_dict["auction_close"])
 
-        gdcat.append(copy.deepcopy(content_dict))
+        gdlistings.add_listing(copy.deepcopy(content_dict), cc)
 
-    return gdcat
+    return gdlistings
 
 
-# returns a list containing a list of dicts formatted for insertion into DB
-def gather_listings() -> list:
+# returns a GovDeals object containing a list of GovDealsListings
+def gather_listings():
     cat_code_dict = copy.deepcopy(GOVDEALS_CODES)
     # Get max rows for all categories in a single HTTP request
     cat_max_rows = {k: get_max_rows(v) for k, v in cat_code_dict.items()}
 
-    all_rows = []
+    obj = GovDeals()
     for key, cat_code in cat_code_dict.items():
         rows = get_rows(cat_code, cat_max_rows[key])
         if rows is not None:
-            obj = GovDealsCategory(category=cat_code)
-            contents = take_rows_give_contents(rows, obj)
-            all_rows.append(contents)
-    return all_rows
+            take_rows_give_contents(rows, obj, cat_code)
+    return obj
 
 
 def load_json_dump():
@@ -191,16 +194,75 @@ def load_json_dump():
     return data
 
 
-class GovDealsCategory:
-    def __init__(self, category):
+def convert_datetime(dt: str) -> int:
+    knowntime = parser.parse(dt)
+    return int(knowntime.timestamp())
+
+
+class GovDealsListing:
+    def __init__(self, gddict: dict, category: int):
+        self._gddict = gddict
         self.category = category
-        self.listings = []
 
-    def append(self, dict):
-        self.listings.append(dict)
+    @property
+    def itemid(self) -> str:
+        return self._extract_id("itemid")
 
-    def all_listings(self) -> list:
+    @property
+    def acctid(self) -> str:
+        return self._extract_id("acctid")
+
+    @property
+    def listingid(self) -> str:
+        return f"{self.acctid}{self.itemid}"
+
+    @property
+    def description(self) -> str:
+        return self._gddict.get("description", "")
+
+    @property
+    def location(self) -> str:
+        return self._gddict.get("location", "")
+
+    @property
+    def auction_close(self) -> str:
+        # stored as integer, converted back to string for use
+        dt = datetime.fromtimestamp(int(self._gddict.get("auction_close", "")))
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    @property
+    def current_bid(self) -> str:
+        return self._gddict.get("current_bid", "")
+
+    @property
+    def info_link(self) -> str:
+        return self._gddict.get("info_link", "")
+
+    @property
+    def photo_link(self) -> str:
+        return self._gddict.get("photo_link", "")
+
+    def _extract_id(self, key: str) -> str:
+        id_str = self._gddict.get("info_link", "")
+        id_dict = dict(x.split("=") for x in id_str.split("&") if "=" in x)
+        return id_dict.get(key, "")
+
+    def __repr__(self) -> str:
+        return f"GovDealsListing({self.listingid})"
+
+
+class GovDeals:
+    def __init__(self):
+        self.listings: List[GovDealsListing] = []
+
+    def add_listing(self, gddict: dict, category: int) -> None:
+        self.listings.append(GovDealsListing(gddict, category))
+
+    def all_listings(self) -> List[GovDealsListing]:
         return self.listings
+
+    def __iter__(self):
+        return iter(self.listings)
 
 
 """

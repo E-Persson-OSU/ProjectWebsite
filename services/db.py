@@ -57,24 +57,25 @@ def get_recent_db():
 
 
 # takes list of lists of dicts and adds them to database
-def update_listings(rows):
+def update_listings(govdeals):
     with get_db() as conn:
         cursor = conn.cursor()
-        for row in rows:
-            for d in row.all_listings():
-                cursor.execute(
-                    "INSERT INTO GovDeals (id, category, description, location, auction_close, current_bid, info_link, photo_link) VALUES(?,?,?,?,?,?,?,?)",
-                    (
-                        None,
-                        row.category,
-                        d["description"],
-                        d["location"],
-                        d["auction_close"],
-                        d["current_bid"],
-                        d["info_link"],
-                        d["photo_link"],
-                    ),
-                )
+        for listing in govdeals:
+            cursor.execute(
+                "INSERT INTO GovDeals (listingid, acctid, itemid, category, description, location, auction_close, current_bid, info_link, photo_link) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (
+                    listing.listingid,
+                    listing.acctid,
+                    listing.itemid,
+                    listing.category,
+                    listing.description,
+                    listing.location,
+                    listing.auction_close,
+                    listing.current_bid,
+                    listing.info_link,
+                    listing.photo_link,
+                ),
+            )
         conn.commit()
 
     ...

@@ -3,17 +3,8 @@ import redis
 from pathlib import Path
 from rq import Worker, Queue, Connection
 
-import logging
+from services.base_logger import logger
 import sys
-
-LOGGING_PATH = Path("services/logs/") / "worker.log"
-
-logging.basicConfig(
-    filename=LOGGING_PATH,
-    filemode="w",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
 
 listen = ["high", "default", "low"]
 
