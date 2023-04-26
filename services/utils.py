@@ -1,4 +1,4 @@
-import logging
+from services.base_logger import logging
 import services.govdeals as gd
 import services.jailbase as jb
 import services.db as db
@@ -7,17 +7,8 @@ from pathlib import Path
 from datetime import *
 
 LASTRUN_PATH = Path("services/bin/") / "lastrun.json"
-LOGGING_PATH = Path("services/logs/") / "utils.log"
 
 dateformat = "%m/%d/%Y, %H:%M:%S"
-
-# set up logging
-logging.basicConfig(
-    filename=LOGGING_PATH,
-    filemode="w",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
 
 
 # wrap up both updates in one method, export current time to json after running, only run if json time past last 24hrs
@@ -54,7 +45,8 @@ def background_updates():
 
 # gather current listings, add to database
 def update_govdeals():
-    ...
+    rows = gd.gather_listings()
+    db.update_listings(rows)
 
 
 def update_jailbase():

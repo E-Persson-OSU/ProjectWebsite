@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS GovDeals (
                 description TEXT,
                 location TEXT,
                 auction_close INTEGER,
-                current_bid TEXT
-                more_info_link TEXT,
+                current_bid TEXT,
+                info_link TEXT,
                 photo_link TEXT
 );
 

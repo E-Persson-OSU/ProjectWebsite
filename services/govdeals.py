@@ -4,21 +4,12 @@ import re
 import copy
 from pathlib import Path
 import json
-import logging
 from static.proxies import random_proxy
+from services.base_logger import logger
 from static.govdeals_cats import (
     GOVDEALS_LINK_CAT,
     GOVDEALS_CODES,
     GOVDEALS_LINK_CAT_MAX_ROWS,
-)
-
-LOGGING_PATH = Path("services/logs/") / "govdeals.log"
-
-logging.basicConfig(
-    filename=LOGGING_PATH,
-    filemode="w",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
 )
 
 headers = {
@@ -60,7 +51,9 @@ Worker methods for updating database
 def get_max_rows(cat_code):
     url = get_link(cat_code)
     try:
-        response = requests.get(url=url, headers=headers, proxies=random_proxy())
+        prox = random_proxy()
+        logger.info("Using {} as proxy".format(prox["http"]))
+        response = requests.get(url=url, headers=headers, proxies=prox)
         response.raise_for_status()  # raise an error if the response status code is not 200
         soup = BeautifulSoup(response.content, "html.parser")
         allstrong = soup.find_all("strong")
@@ -89,7 +82,9 @@ def get_max_rows(cat_code):
 def get_rows(cc, mr) -> list:
     url = get_link(cat_code=cc, max_rows=mr)
     try:
-        response = requests.get(url=url, headers=headers, proxies=random_proxy())
+        prox = random_proxy()
+        logger.info("Using {} as a proxy".format(prox["http"]))
+        response = requests.get(url=url, headers=headers, proxies=prox)
         response.raise_for_status()  # raise an error if the response status code is not 200
         soup = BeautifulSoup(response.content, "html.parser")
         allrow = soup.find_all("div", id="boxx_row")
@@ -114,15 +109,14 @@ def get_link(cat_code, max_rows=0) -> str:
 
 
 # takes a list of unparsed rows, returns the required contents as a list of dicts
-def take_rows_give_contents(rows) -> list:
-    contents = []
+def take_rows_give_contents(rows, gdcat):
     for row in rows:
         content_dict = {
             "description": None,
             "location": None,
             "auction_close": None,
             "current_bid": None,
-            "more_info_link": None,
+            "info_link": None,
             "photo_link": None,
         }
         row = str(row)
@@ -150,7 +144,7 @@ def take_rows_give_contents(rows) -> list:
             auction_close_label.strip() + auction_close_span.strip()
         )
         content_dict["current_bid"] = bid_price.text.strip() if bid_price else ""
-        content_dict["more_info_link"] = (
+        content_dict["info_link"] = (
             result_col_1_div_a["href"].strip() if result_col_1_div_a else ""
         )
         content_dict["photo_link"] = (
@@ -168,9 +162,9 @@ def take_rows_give_contents(rows) -> list:
                 .strip()
             )
 
-        contents.append(copy.deepcopy(content_dict))
+        gdcat.append(copy.deepcopy(content_dict))
 
-    return contents
+    return gdcat
 
 
 # returns a list containing a list of dicts formatted for insertion into DB
@@ -183,7 +177,8 @@ def gather_listings() -> list:
     for key, cat_code in cat_code_dict.items():
         rows = get_rows(cat_code, cat_max_rows[key])
         if rows is not None:
-            contents = take_rows_give_contents(rows)
+            obj = GovDealsCategory(category=cat_code)
+            contents = take_rows_give_contents(rows, obj)
             all_rows.append(contents)
     return all_rows
 
@@ -194,6 +189,18 @@ def load_json_dump():
     with open(file_path, "r") as f:
         data = json.load(fp=f)
     return data
+
+
+class GovDealsCategory:
+    def __init__(self, category):
+        self.category = category
+        self.listings = []
+
+    def append(self, dict):
+        self.listings.append(dict)
+
+    def all_listings(self) -> list:
+        return self.listings
 
 
 """

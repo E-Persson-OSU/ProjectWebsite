@@ -1,20 +1,12 @@
 import sqlite3
 from pathlib import Path
-import logging
+from services.base_logger import logger
 
 """
 global variables
 """
 DB_PATH = Path("database.db")
 SCHEMA_PATH = Path("static/db/") / "schema.sql"
-LOGGING_PATH = Path("services/logs/") / "db.log"
-
-logging.basicConfig(
-    filename=LOGGING_PATH,
-    filemode="w",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
 
 
 def get_db():
@@ -64,6 +56,30 @@ def get_recent_db():
         return records
 
 
+# takes list of lists of dicts and adds them to database
+def update_listings(rows):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        for row in rows:
+            for d in row.all_listings():
+                cursor.execute(
+                    "INSERT INTO GovDeals (id, category, description, location, auction_close, current_bid, info_link, photo_link) VALUES(?,?,?,?,?,?,?,?)",
+                    (
+                        None,
+                        row.category,
+                        d["description"],
+                        d["location"],
+                        d["auction_close"],
+                        d["current_bid"],
+                        d["info_link"],
+                        d["photo_link"],
+                    ),
+                )
+        conn.commit()
+
+    ...
+
+
 """
 ------------------------------------------
 
@@ -74,15 +90,21 @@ def get_recent_db():
 
 
 def init_db(source_ids=[]):
+    logger.info("init_db")
     create_table()
     if len(source_ids) > 0:
+        logger.info("Updating source IDs")
         init_source_ids(source_ids)
+    else:
+        logger.info("No changes to source IDs")
 
 
 def create_table():
+    logger.info("create_table")
     with get_db() as conn:
         cursor = conn.cursor()
         with open(SCHEMA_PATH) as f:
+            logger.info("Reading Schema")
             cursor.executescript(f.read())
         conn.commit()
 
@@ -91,7 +113,7 @@ def init_source_ids(source_ids):
     with get_db() as conn:
         cursor = conn.cursor()
         for source_id in source_ids:
-            logging.info(f"Adding {source_id['name']} to database")
+            logger.info(f"Adding {source_id['name']} to database")
             cursor.execute(
                 "INSERT INTO source_ids (id, city, name, state_full, address1, source_url, county, phone, state, source_id, zip_code, email, has_mugshots) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (
