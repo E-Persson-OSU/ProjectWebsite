@@ -6,9 +6,9 @@ FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 logging.basicConfig(
     filename=LOGGING_PATH,
-    filemode="a",
+    filemode="w",
     format=FORMAT,
-    level=logging.NOTSET,
+    level=logging.ERROR,
 )
 
 logger = logging

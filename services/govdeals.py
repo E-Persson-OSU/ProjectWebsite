@@ -1,29 +1,118 @@
-from bs4 import BeautifulSoup
-import requests
-import re
 import copy
-from pathlib import Path
-import json
 import datetime
-from dateutil import parser
+import json
+import re
+from pathlib import Path
 from typing import List
-from static.proxies import random_proxy
+
+import requests
+from bs4 import BeautifulSoup
+from dateutil import parser
+
 from services.base_logger import logger
 from static.govdeals_cats import (
-    GOVDEALS_LINK_CAT,
     GOVDEALS_CODES,
+    GOVDEALS_LINK_CAT,
     GOVDEALS_LINK_CAT_MAX_ROWS,
 )
+from static.proxies import random_header, random_proxy
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
-    "Cache-Control": "max-age=0",
-}
+"""
+------------------------
+GLOBAL VARIABLES
+------------------------
+"""
+
+# setting this value to True skims off the non ohio listings in the gather_listings function
+OHIO_ONLY = True
+
+"""
+------------------------
+CUSTOM CLASSES
+------------------------
+"""
 
 
+class GovDealsListing:
+    def __init__(self, gddict: dict, category: int):
+        self._gddict = gddict
+        self.category = category
+
+    def __str__(self):
+        return self.description
+
+    @property
+    def itemid(self) -> str:
+        return self._extract_id("itemid")
+
+    @property
+    def acctid(self) -> str:
+        return self._extract_id("acctid")
+
+    @property
+    def listingid(self) -> str:
+        return f"{self.acctid}{self.itemid}"
+
+    @property
+    def description(self) -> str:
+        return self._gddict.get("description", "")
+
+    @property
+    def location(self) -> str:
+        return self._gddict.get("location", "")
+
+    @property
+    def auction_close(self) -> str:
+        # stored as integer, converted back to string for use
+        dt = datetime.datetime.fromtimestamp(int(self._gddict.get("auction_close", "")))
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    @property
+    def current_bid(self) -> str:
+        return self._gddict.get("current_bid", "")
+
+    @property
+    def info_link(self) -> str:
+        return self._gddict.get("info_link", "")
+
+    @property
+    def photo_link(self) -> str:
+        return self._gddict.get("photo_link", "")
+
+    def _extract_id(self, key: str) -> str:
+        id_str = self._gddict.get("info_link", "")
+        id_dict = dict(x.split("=") for x in id_str.split("&") if "=" in x)
+        return id_dict.get(key, "")
+
+    def __repr__(self) -> str:
+        return f"GovDealsListing({self.listingid})"
+
+
+class GovDeals:
+    def __init__(self):
+        self.listings: List[GovDealsListing] = []
+
+    def add_listing(self, gddict: dict, category: int) -> None:
+        self.listings.append(GovDealsListing(gddict, category))
+
+    def all_listings(self) -> List[GovDealsListing]:
+        return self.listings
+
+    def remove_listing(self, listing: GovDealsListing):
+        self.listings.remove(listing)
+
+    def __iter__(self):
+        return iter(self.listings)
+
+
+"""
+------------------------
+internal methods
+------------------------
+"""
+
+
+# removes escape characters from string
 def remove_escape_characters(text):
     # Define regex pattern to match escape characters
     escape_pattern = r"\\[nrt\xa0]"
@@ -41,6 +130,40 @@ def remove_escape_characters(text):
     )
 
 
+def get_link(cat_code, max_rows=0) -> str:
+    if max_rows > 0:
+        return GOVDEALS_LINK_CAT_MAX_ROWS.format(cat_code, max_rows)
+    else:
+        return GOVDEALS_LINK_CAT.format(cat_code)
+
+
+def convert_datetime(dt: str) -> int:
+    knowntime = parser.parse(remove_duplicate_time(dt), ignoretz=True)
+    return int(knowntime.timestamp())
+
+
+# fixes this issue: 5/9/2023 3:00 PM ET3:00 PM ET
+def remove_duplicate_time(s: str) -> str:
+    pattern = r"(\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2} [AP]M [A-Z]{2})(\d{1,2}:\d{2} [AP]M [A-Z]{2})$"
+    match = re.search(pattern, s)
+    if match:
+        return s[: match.start(2)].strip()
+    else:
+        return s
+
+
+def for_ohio(obj: GovDeals):
+    gleaning = []
+    for listing in obj:
+        if "OH" not in listing.location:
+            gleaning.append(listing)
+            logger.debug(
+                "Removed {} located at {}".format(listing.description, listing.location)
+            )
+    for listing in gleaning:
+        obj.remove_listing(listing)
+
+
 """
 Worker methods for updating database
 
@@ -55,8 +178,9 @@ def get_max_rows(cat_code):
     url = get_link(cat_code)
     try:
         prox = random_proxy()
+        head = random_header()
         logger.info("Using {} as proxy".format(prox["http"]))
-        response = requests.get(url=url, headers=headers, proxies=prox)
+        response = requests.get(url=url, headers=head, proxies=prox)
         response.raise_for_status()  # raise an error if the response status code is not 200
         soup = BeautifulSoup(response.content, "html.parser")
         allstrong = soup.find_all("strong")
@@ -78,7 +202,7 @@ def get_max_rows(cat_code):
         ValueError,
         requests.exceptions.ConnectionError,
     ) as e:
-        print(f"Error: {e}")
+        logger.error("{} \nproxy: {}\nheader: {}".format(e, prox, head))
         return None
 
 
@@ -86,8 +210,9 @@ def get_rows(cc, mr) -> list:
     url = get_link(cat_code=cc, max_rows=mr)
     try:
         prox = random_proxy()
-        logger.info("Using {} as a proxy".format(prox["http"]))
-        response = requests.get(url=url, headers=headers, proxies=prox)
+        head = random_header()
+        logger.info("Using {} as proxy".format(prox["http"]))
+        response = requests.get(url=url, headers=head, proxies=prox)
         response.raise_for_status()  # raise an error if the response status code is not 200
         soup = BeautifulSoup(response.content, "html.parser")
         allrow = soup.find_all("div", id="boxx_row")
@@ -100,15 +225,8 @@ def get_rows(cc, mr) -> list:
         ValueError,
         requests.exceptions.ConnectionError,
     ) as e:
-        print(f"Error: {e}")
+        logger.error("{} \nproxy: {}\nheader: {}".format(e, prox, head))
         return None
-
-
-def get_link(cat_code, max_rows=0) -> str:
-    if max_rows > 0:
-        return GOVDEALS_LINK_CAT_MAX_ROWS.format(cat_code, max_rows)
-    else:
-        return GOVDEALS_LINK_CAT.format(cat_code)
 
 
 # takes a list of unparsed rows, returns the required contents as a list of dicts
@@ -183,95 +301,20 @@ def gather_listings():
         rows = get_rows(cat_code, cat_max_rows[key])
         if rows is not None:
             take_rows_give_contents(rows, obj, cat_code)
+    if OHIO_ONLY:
+        for_ohio(obj)
     return obj
 
 
+"""
+# this method is no longer being used, keeping it around for now just in case
 def load_json_dump():
     data_folder = Path("services/json-cache/")
     file_path = data_folder / "test_rows.json"
     with open(file_path, "r") as f:
         data = json.load(fp=f)
     return data
-
-
-def convert_datetime(dt: str) -> int:
-    knowntime = parser.parse(remove_duplicate_time(dt))
-    return int(knowntime.timestamp())
-
-
-def remove_duplicate_time(s: str) -> str:
-    pattern = r"(\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2} [AP]M [A-Z]{2})(\d{1,2}:\d{2} [AP]M [A-Z]{2})$"
-    match = re.search(pattern, s)
-    if match:
-        return s[: match.start(2)].strip()
-    else:
-        return s
-
-
-class GovDealsListing:
-    def __init__(self, gddict: dict, category: int):
-        self._gddict = gddict
-        self.category = category
-
-    @property
-    def itemid(self) -> str:
-        return self._extract_id("itemid")
-
-    @property
-    def acctid(self) -> str:
-        return self._extract_id("acctid")
-
-    @property
-    def listingid(self) -> str:
-        return f"{self.acctid}{self.itemid}"
-
-    @property
-    def description(self) -> str:
-        return self._gddict.get("description", "")
-
-    @property
-    def location(self) -> str:
-        return self._gddict.get("location", "")
-
-    @property
-    def auction_close(self) -> str:
-        # stored as integer, converted back to string for use
-        dt = datetime.datetime.fromtimestamp(int(self._gddict.get("auction_close", "")))
-        return dt.strftime("%Y-%m-%d %H:%M:%S")
-
-    @property
-    def current_bid(self) -> str:
-        return self._gddict.get("current_bid", "")
-
-    @property
-    def info_link(self) -> str:
-        return self._gddict.get("info_link", "")
-
-    @property
-    def photo_link(self) -> str:
-        return self._gddict.get("photo_link", "")
-
-    def _extract_id(self, key: str) -> str:
-        id_str = self._gddict.get("info_link", "")
-        id_dict = dict(x.split("=") for x in id_str.split("&") if "=" in x)
-        return id_dict.get(key, "")
-
-    def __repr__(self) -> str:
-        return f"GovDealsListing({self.listingid})"
-
-
-class GovDeals:
-    def __init__(self):
-        self.listings: List[GovDealsListing] = []
-
-    def add_listing(self, gddict: dict, category: int) -> None:
-        self.listings.append(GovDealsListing(gddict, category))
-
-    def all_listings(self) -> List[GovDealsListing]:
-        return self.listings
-
-    def __iter__(self):
-        return iter(self.listings)
+"""
 
 
 """

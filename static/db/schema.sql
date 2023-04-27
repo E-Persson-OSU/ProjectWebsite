@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS GovDeals;
 
 CREATE TABLE IF NOT EXISTS GovDeals (
-                listingid INTEGER,
+                listingid INTEGER PRIMARY KEY,
                 acctid INTEGER,
                 itemid INTEGER,
                 category INTEGER,
