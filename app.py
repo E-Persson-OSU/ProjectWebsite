@@ -36,8 +36,8 @@ def index():
 @app.route("/jailbase")
 def jailbase():
     # records = jb.getrecent(db.getrandomsourceid()) Get this working eventually
-    randomsource = random.choice(db.getsourceids())
-    records = jb.getrecent(randomsource["source_id"])
+    randomsource = random.choice(db.get_source_ids())
+    records = jb.getrecent(randomsource[0])
     return render_template("jailbase.html", records=records["records"])
 
 
@@ -72,12 +72,9 @@ def govdeals():
 
 @app.route("/govdeals/<pagenum>", methods=["POST", "GET"])
 def govdealspage(pagenum=1):
-    data = gd.load_json_dump()
-    items = []
-    for l in data:
-        for row in l:
-            items.append(row)
-    return render_template("govdeals.html", items=PageResult(items, page=int(pagenum)))
+    return render_template(
+        "govdeals.html", items=PageResult(data=gd.db_all_listings(), page=int(pagenum))
+    )
 
 
 @app.route("/about")
@@ -95,11 +92,12 @@ def internalservererror():
     return "page not found"
 
 
+# Passing this a GovDeals object as <data> should work
 class PageResult:
     def __init__(self, data, page=1, number=10):
         self.__dict__ = dict(zip(["data", "page", "number"], [data, page, number]))
         self.full_listing = [
-            self.data[i : i + number] for i in range(0, len(self.data), number)
+            self.data.listings[i : i + number] for i in range(0, len(self.data), number)
         ]
 
     def __iter__(self):

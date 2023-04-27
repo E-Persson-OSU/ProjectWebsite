@@ -1,6 +1,7 @@
 import sqlite3
 from pathlib import Path
 from services.base_logger import logger
+from services.govdeals import GovDeals, GovDealsListing
 
 """
 global variables
@@ -59,14 +60,14 @@ def get_recent_db():
         return records
 
 
-# takes list of lists of dicts and adds them to database
 def update_listings(govdeals):
     with get_db() as conn:
         cursor = conn.cursor()
         with open(SQL_PATH / "insert_govdeals.sql") as file:
-            for listing in govdeals:
-                cursor.execute(
-                    file.read(),
+            query = file.read()
+            cursor.executemany(
+                query,
+                [
                     (
                         listing.listingid,
                         listing.acctid,
@@ -78,11 +79,30 @@ def update_listings(govdeals):
                         listing.current_bid,
                         listing.info_link,
                         listing.photo_link,
-                    ),
-                )
+                    )
+                    for listing in govdeals
+                ],
+            )
         conn.commit()
 
-    ...
+
+def get_all_listings(obj: GovDeals) -> GovDeals:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        with open(SQL_PATH / "select_alllistings.sql") as file:
+            query = file.read()
+            cursor.execute(query)
+            results = cursor.fetchall()
+            content_dict = {
+                "description": results[4],
+                "location": results[5],
+                "auction_close": results[6],
+                "current_bid": results[7],
+                "info_link": results[8],
+                "photo_link": results[9],
+            }
+            obj.add_listing(content_dict, results[4])
+    return obj
 
 
 """
@@ -108,7 +128,7 @@ def create_table():
     logger.info("create_table")
     with get_db() as conn:
         cursor = conn.cursor()
-        with open(SQL_PATH) as f:
+        with open(SCHEMA_PATH) as f:
             logger.info("Reading Schema")
             cursor.executescript(f.read())
         conn.commit()
