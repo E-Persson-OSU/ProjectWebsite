@@ -4,11 +4,10 @@ import json
 import re
 from pathlib import Path
 from typing import List
-
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
-
+import services.db as db
 from services.base_logger import logger
 from static.govdeals_cats import (
     GOVDEALS_CODES,
@@ -64,7 +63,10 @@ class GovDealsListing:
     @property
     def auction_close(self) -> str:
         # stored as integer, converted back to string for use
-        dt = datetime.datetime.fromtimestamp(int(self._gddict.get("auction_close", "")))
+        ac = self._gddict.get("auction_close", "")
+        if type(ac) is tuple:
+            ac = datetime.datetime.now()
+        dt = datetime.datetime.fromtimestamp(int(ac))
         return dt.strftime("%Y-%m-%d %H:%M:%S")
 
     @property
@@ -103,6 +105,9 @@ class GovDeals:
 
     def __iter__(self):
         return iter(self.listings)
+
+    def __len__(self):
+        return len(self.listings)
 
 
 """
@@ -321,6 +326,12 @@ def load_json_dump():
 Web methods for querying database and populating webpage
 
 """
+
+
+# returns a GovDeals object containing all of the listings in the database
+def db_all_listings():
+    return db.get_all_listings(GovDeals())
+
 
 # pull entries from database when web page is loaded
 # return them as a list of dictionaries

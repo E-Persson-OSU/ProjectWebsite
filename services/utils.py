@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from datetime import *
 
-LASTRUN_PATH = Path("services/bin/") / "lastrun.json"
+LASTRUN_PATH = Path("services/json-cache/") / "lastrun.json"
 
 dateformat = "%m/%d/%Y, %H:%M:%S"
 
