@@ -1,4 +1,17 @@
-DROP TABLE IF EXISTS source_ids;
+DROP TABLE IF EXISTS GovDeals;
+
+CREATE TABLE IF NOT EXISTS GovDeals (
+                listingid INTEGER PRIMARY KEY,
+                acctid INTEGER,
+                itemid INTEGER,
+                category INTEGER,
+                description TEXT,
+                location TEXT,
+                auction_close INTEGER,
+                current_bid TEXT,
+                info_link TEXT,
+                photo_link TEXT
+);
 
 CREATE TABLE IF NOT EXISTS source_ids  (
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,4 +26,4 @@ CREATE TABLE IF NOT EXISTS source_ids  (
                  source_id TEXT,
                  zip_code TEXT,
                  email TEXT,
-                 has_mugshots BOOLEAN)
+                 has_mugshots BOOLEAN);
