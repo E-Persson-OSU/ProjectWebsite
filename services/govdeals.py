@@ -62,12 +62,7 @@ class GovDealsListing:
 
     @property
     def auction_close(self) -> str:
-        # stored as integer, converted back to string for use
-        ac = self._gddict.get("auction_close", "")
-        if type(ac) is tuple:
-            ac = datetime.datetime.now()
-        dt = datetime.datetime.fromtimestamp(int(ac))
-        return dt.strftime("%Y-%m-%d %H:%M:%S")
+        return self._gddict.get("auction_close", "")
 
     @property
     def current_bid(self) -> str:

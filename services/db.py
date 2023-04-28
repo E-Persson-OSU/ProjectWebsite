@@ -93,15 +93,16 @@ def get_all_listings(obj: GovDeals) -> GovDeals:
             query = file.read()
             cursor.execute(query)
             results = cursor.fetchall()
-            content_dict = {
-                "description": results[4],
-                "location": results[5],
-                "auction_close": results[6],
-                "current_bid": results[7],
-                "info_link": results[8],
-                "photo_link": results[9],
-            }
-            obj.add_listing(content_dict, results[4])
+            for result in results:
+                content_dict = {
+                    "description": result[4],
+                    "location": result[5],
+                    "auction_close": result[6],
+                    "current_bid": result[7],
+                    "info_link": result[8],
+                    "photo_link": result[9],
+                }
+                obj.add_listing(content_dict, result[4])
     return obj
 
 
