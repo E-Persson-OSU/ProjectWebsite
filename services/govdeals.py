@@ -131,7 +131,7 @@ def remove_escape_characters(text):
 
 
 def get_link(cat_code, max_rows=0) -> str:
-    if max_rows > 0:
+    if max_rows != None and max_rows > 0:
         return GOVDEALS_LINK_CAT_MAX_ROWS.format(cat_code, max_rows)
     else:
         return GOVDEALS_LINK_CAT.format(cat_code)
