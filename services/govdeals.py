@@ -1,3 +1,4 @@
+"""module for interacting with govdeals website"""
 import copy
 import datetime
 import json
@@ -7,8 +8,8 @@ from typing import List
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
-import services.db as db
-from services.base_logger import logger
+import db
+from base_logger import logger
 from static.govdeals_cats import (
     GOVDEALS_CODES,
     GOVDEALS_LINK_CAT,
